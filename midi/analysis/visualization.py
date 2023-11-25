@@ -13,7 +13,7 @@ from rdkit.Chem import Draw, AllChem
 from rdkit.Geometry import Point3D
 from rdkit import RDLogger
 from sklearn.decomposition import PCA
-
+import tracemalloc
 from midi.analysis.rdkit_functions import Molecule
 
 
@@ -45,7 +45,6 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
         if log is not None and wandb.run:
             wandb.log({log: wandb.Image(file_path)}, commit=True)
-    del molecules
     return all_file_paths
 
 
@@ -120,6 +119,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         print("Molecule list generated.")
 
         # Extract the positions of the final 2d molecule
+        tracemalloc.start()
         last_mol = mols[-1].rdkit_mol
         AllChem.Compute2DCoords(last_mol)
         coords = []
@@ -128,13 +128,27 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             p = conf.GetAtomPosition(k)
             coords.append([p.x, p.y, p.z])
         conformer2d = torch.Tensor(coords)
-
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
+        print("Conformer2d generated.")
+        tracemalloc.stop()
+        tracemalloc.clear_traces()
+        tracemalloc.start()
         for frame in range(len(mols)):
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
 
 
-
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
+        tracemalloc.stop()
+        tracemalloc.clear_traces()
         # Turn the frames into a gif
         imgs = [imageio.v3.imread(fn) for fn in all_file_paths]
         gif_path = os.path.join(os.path.dirname(path), f"{path.split('/')[-1]}_{i}.gif")
@@ -147,7 +161,6 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
 
         print("Chain saved.")
-        del mols, imgs, all_file_paths, coords, conformer2d
     # draw grid image
     # try:
     #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
