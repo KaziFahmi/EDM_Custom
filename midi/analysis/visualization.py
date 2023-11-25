@@ -45,7 +45,7 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
         if log is not None and wandb.run:
             wandb.log({log: wandb.Image(file_path)}, commit=True)
-
+    del molecules, mol, pos, file_path
     return all_file_paths
 
 

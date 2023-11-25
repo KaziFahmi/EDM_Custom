@@ -434,25 +434,25 @@ class FullDenoisingDiffusion(pl.LightningModule):
                                           bond_types=edge_types, positions=conformer,
                                           atom_decoder=self.dataset_infos.atom_decoder))
 
-        # # Visualize chains
-        # if keep_chain > 0:
-        #     self.print('Batch sampled. Visualizing chains starts!')
-        #     chains_path = os.path.join(os.getcwd(), f'chains/epoch{self.current_epoch}/',
-        #                                f'batch{batch_id}_GR{self.global_rank}')
-        #     os.makedirs(chains_path, exist_ok=True)
+        # Visualize chains
+        if keep_chain > 0:
+            self.print('Batch sampled. Visualizing chains starts!')
+            chains_path = os.path.join(os.getcwd(), f'chains/epoch{self.current_epoch}/',
+                                       f'batch{batch_id}_GR{self.global_rank}')
+            os.makedirs(chains_path, exist_ok=True)
 
-        #     visualizer.visualize_chains(chains_path, chains,
-        #                                 num_nodes=n_nodes[:keep_chain],
-        #                                 atom_decoder=self.dataset_infos.atom_decoder)
+            visualizer.visualize_chains(chains_path, chains,
+                                        num_nodes=n_nodes[:keep_chain],
+                                        atom_decoder=self.dataset_infos.atom_decoder)
 
-        # if save_final > 0:
-        #     self.print(f'Visualizing {save_final} individual molecules...')
+        if save_final > 0:
+            self.print(f'Visualizing {save_final} individual molecules...')
 
-        # # Visualize the final molecules
-        # current_path = os.getcwd()
-        # result_path = os.path.join(current_path, f'graphs/epoch{self.current_epoch}_b{batch_id}/')
-        # _ = visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
-        # self.print("Visualizing done.")
+        # Visualize the final molecules
+        current_path = os.getcwd()
+        result_path = os.path.join(current_path, f'graphs/epoch{self.current_epoch}_b{batch_id}/')
+        _ = visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
+        self.print("Visualizing done.")
         return molecule_list
 
     def sample_zs_from_zt(self, z_t, s_int):
