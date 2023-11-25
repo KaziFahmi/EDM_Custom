@@ -145,7 +145,10 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         if wandb.run:
             wandb.log({"chain": wandb.Video(gif_path, fps=5, format="gif")}, commit=True)
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
+
         print("Chain saved.")
+        del mols, imgs, all_file_paths, coords, conformer2d, last_mol, chain_atoms, chain_charges, chain_bonds, chain_positions, pos
+        del conf, gif_path, result_path, frame
     # draw grid image
     # try:
     #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
