@@ -45,7 +45,7 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
         if log is not None and wandb.run:
             wandb.log({log: wandb.Image(file_path)}, commit=True)
-    del molecules, mol, pos, file_path
+    del molecules
     return all_file_paths
 
 
@@ -147,8 +147,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
 
         print("Chain saved.")
-        del mols, imgs, all_file_paths, coords, conformer2d, last_mol, chain_atoms, chain_charges, chain_bonds, chain_positions, pos
-        del conf, gif_path, result_path, frame
+        del mols, imgs, all_file_paths, coords, conformer2d
     # draw grid image
     # try:
     #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
