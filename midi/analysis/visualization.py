@@ -72,6 +72,9 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     draw.text((420, 15), "2D view", font=font, fill='black')
     new_im.save(save_path, "PNG")
     buffer.close()
+    pil3d.close()
+    new_im.close()
+
 
 
 def generatePIL2d(mol, conformer2d=None):
