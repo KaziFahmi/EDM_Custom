@@ -117,6 +117,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         self.val_nll.reset()
         self.val_metrics.reset()
 
+    @torch.no_grad()
     def validation_step(self, data, i):
         dense_data = utils.to_dense(data, self.dataset_infos)
         z_t = self.noise_model.apply_noise(dense_data)
@@ -124,7 +125,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         pred = self.forward(z_t, extra_data)
         nll, log_dict = self.compute_val_loss(pred, z_t, clean_data=dense_data, test=False)
         return {'loss': nll}, log_dict
-
+    @torch.no_grad()
     def on_validation_epoch_end(self) -> None:
         metrics = [self.val_nll.compute(), self.val_metrics.compute()]
         log_dict = {"val/epoch_NLL": metrics[0],
@@ -166,13 +167,13 @@ class FullDenoisingDiffusion(pl.LightningModule):
             print(f"Computing sampling metrics on {self.local_rank}...")
             self.val_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
         self.print(f"Val epoch {self.current_epoch} ends")
-
+    @torch.no_grad()
     def on_test_epoch_start(self):
         if self.local_rank == 0:
             utils.setup_wandb(self.cfg)
         self.test_nll.reset()
         self.test_metrics.reset()
-
+    @torch.no_grad()
     def test_step(self, data, i):
         dense_data = utils.to_dense(data, self.dataset_infos)
         z_t = self.noise_model.apply_noise(dense_data)
@@ -180,7 +181,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         pred = self.forward(z_t, extra_data)
         nll, log_dict = self.compute_val_loss(pred, z_t, clean_data=dense_data, test=True)
         return {'loss': nll}, log_dict
-
+    @torch.no_grad()
     def on_test_epoch_end(self) -> None:
         """ Measure likelihood on a test set and compute stability metrics. """
         metrics = [self.test_nll.compute(), self.test_metrics.compute()]
@@ -252,7 +253,6 @@ class FullDenoisingDiffusion(pl.LightningModule):
         self.test_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
         print(f'Done. Sampling took {time.time() - start:.2f} seconds\n')
         print(f"Test ends.")
-
     def kl_prior(self, clean_data, node_mask):
         """Computes the KL between q(z1 | x) and the prior p(z1) = Normal(0, 1).
 
@@ -329,7 +329,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         prob_pred.pos = prefactor * pred.pos
         metrics = (self.test_metrics if test else self.val_metrics)(prob_pred, prob_true)
         return self.T * (metrics['PosMSE'] + metrics['XKl'] + metrics['ChargesKl'] + metrics['EKl'])
-
+    @torch.no_grad()
     def compute_val_loss(self, pred, z_t, clean_data, test=False):
         """Computes an estimator for the variational lower bound, or the simple loss (MSE).
            pred: (batch_size, n, total_features)

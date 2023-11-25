@@ -150,6 +150,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
     # except Chem.rdchem.KekulizeException:
     #     print("Can't kekulize molecule")
     # return mols
+    del mols, coords, conformer2d
 
 
 def plot_molecule3d(ax, positions, atom_types, edge_types, alpha, hex_bg_color, num_atom_types):
