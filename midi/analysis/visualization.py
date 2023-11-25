@@ -150,7 +150,6 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
     # except Chem.rdchem.KekulizeException:
     #     print("Can't kekulize molecule")
     # return mols
-    del mols, coords, conformer2d
 
 
 def plot_molecule3d(ax, positions, atom_types, edge_types, alpha, hex_bg_color, num_atom_types):
@@ -235,5 +234,5 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     plt.tight_layout()
     plt.savefig(buffer, format='png', pad_inches=0.0)
     pil_image = PIL.Image.open(buffer)
-    plt.close()
+    plt.close('all')
     return pil_image, max_dist
