@@ -25,7 +25,7 @@ from midi.metrics.molecular_metrics import TrainMolecularMetrics, SamplingMetric
 from midi.diffusion.extra_features import ExtraFeatures
 from midi.analysis.rdkit_functions import Molecule
 from midi.datasets.adaptive_loader import effective_batch_size
-
+import tracemalloc
 
 class FullDenoisingDiffusion(pl.LightningModule):
     model_dtype = torch.float32
@@ -155,6 +155,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
 
 
         self.val_counter += 1
+        tracemalloc.start()
         if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0 and
                                     self.current_epoch > 0):
             self.print(f"Sampling start")
@@ -167,6 +168,12 @@ class FullDenoisingDiffusion(pl.LightningModule):
             print(f'Done on {self.local_rank}. Sampling took {time.time() - start:.2f} seconds\n')
             print(f"Computing sampling metrics on {self.local_rank}...")
             self.val_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
+        tracemalloc.stop()
         self.print(f"Val epoch {self.current_epoch} ends")
     @torch.no_grad()
     def on_test_epoch_start(self):
