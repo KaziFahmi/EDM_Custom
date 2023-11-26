@@ -50,13 +50,13 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
 def plot_save_molecule(mol, save_path, conformer2d=None):
     buffer = io.BytesIO()
-    tracemalloc.start()
+    # tracemalloc.start()
     pil3d, max_dist = generatePIL3d(mol, buffer)
-    snapshot = tracemalloc.take_snapshot()
-    top_stats = snapshot.statistics('lineno')
-    print("[ Top 10 ]")
-    for stat in top_stats[:10]:
-        print(stat)
+    # snapshot = tracemalloc.take_snapshot()
+    # top_stats = snapshot.statistics('lineno')
+    # print("[ Top 10 ]")
+    # for stat in top_stats[:10]:
+    #     print(stat)
     new_im = PIL.Image.new('RGB', (600, 300), color='white')
     new_im.paste(pil3d, (0, 0, 300, 300))
     try:
@@ -247,9 +247,14 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     ax.set_xlim(-axis_lim, axis_lim)
     ax.set_ylim(-axis_lim, axis_lim)
     ax.set_zlim(-axis_lim, axis_lim)
-
+    tracemalloc.start()
     max_dist = plot_molecule3d(ax, positions, atom_types, edge_types, alpha, hex_bg_color, num_atom_types)
-    
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+    print("[ Top 10 ]")
+    for stat in top_stats[:10]:
+        print(stat)
+        
     plt.tight_layout()
     plt.savefig(buffer, format='png', pad_inches=0.0)
     pil_image = PIL.Image.open(buffer)
