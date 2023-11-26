@@ -156,8 +156,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
 
         self.val_counter += 1
         tracemalloc.start()
-        if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0 and
-                                    self.current_epoch > 0):
+        if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0):
             self.print(f"Sampling start")
             start = time.time()
             gen = self.cfg.general
