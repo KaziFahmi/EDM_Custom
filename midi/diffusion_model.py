@@ -454,7 +454,9 @@ class FullDenoisingDiffusion(pl.LightningModule):
         result_path = os.path.join(current_path, f'graphs/epoch{self.current_epoch}_b{batch_id}/')
         _ = visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
         self.print("Visualizing done.")
-        plt.clear('all')
+        plt.cla()
+        plt.clf()
+        plt.close('all')
         return molecule_list
 
     def sample_zs_from_zt(self, z_t, s_int):
