@@ -79,7 +79,7 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     buffer.close()
     pil3d.close()
     new_im.close()
-
+    plt.close('all')  # Close all matplotlib figures to prevent memory leakage
 
 
 def generatePIL2d(mol, conformer2d=None):
@@ -90,11 +90,14 @@ def generatePIL2d(mol, conformer2d=None):
     conf = mol.GetConformer()
     if conformer2d is not None:
         conformer2d = conformer2d.double()
-        for j, atom in enumerate(mol.GetAtoms()):
+        for j, _ in enumerate(mol.GetAtoms()):
             x, y, z = conformer2d[j, 0].item(), conformer2d[j, 1].item(), conformer2d[j, 2].item()
 
             conf.SetAtomPosition(j, Point3D(x, y, z))
-    return Draw.MolToImage(mol)
+    img = Draw.MolToImage(mol)
+    pil2d = PIL.Image.fromarray(np.array(img))
+    img.close()  # Close the matplotlib figure to prevent memory leakage
+    return pil2d
 
 
 def visualize_chains(path, chain, atom_decoder, num_nodes):
@@ -254,10 +257,10 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     print("[ Top 10 ]")
     for stat in top_stats[:10]:
         print(stat)
-    # tracemalloc.stop()
+    tracemalloc.stop()
     plt.tight_layout()
     plt.savefig(buffer, format='png', pad_inches=0.0)
     pil_image = PIL.Image.open(buffer)
+    plt.close(fig)  # Close the figure to prevent memory leakage
     ax.clear()
-    plt.close(fig)
     return pil_image, max_dist
