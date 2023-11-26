@@ -248,9 +248,10 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     ax.set_zlim(-axis_lim, axis_lim)
 
     max_dist = plot_molecule3d(ax, positions, atom_types, edge_types, alpha, hex_bg_color, num_atom_types)
-
+    
     plt.tight_layout()
     plt.savefig(buffer, format='png', pad_inches=0.0)
     pil_image = PIL.Image.open(buffer)
+    ax.clear()
     plt.close('all')
     return pil_image, max_dist
