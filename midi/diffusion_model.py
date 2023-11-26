@@ -172,7 +172,6 @@ class FullDenoisingDiffusion(pl.LightningModule):
         self.print("[ Top 10 ]")
         for stat in top_stats[:10]:
             self.print(stat)
-        tracemalloc.stop()
         self.print(f"Val epoch {self.current_epoch} ends")
     @torch.no_grad()
     def on_test_epoch_start(self):
