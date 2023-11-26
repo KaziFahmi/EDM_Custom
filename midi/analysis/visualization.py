@@ -48,19 +48,20 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
 
 def plot_save_molecule(mol, save_path, conformer2d=None):
-    buffer = io.BytesIO()
+    # buffer = io.BytesIO()
     # tracemalloc.start()
-    pil3d, max_dist = generatePIL3d(mol, buffer)
+    # pil3d, max_dist = generatePIL3d(mol, buffer)
     # snapshot = tracemalloc.take_snapshot()
     # top_stats = snapshot.statistics('lineno')
     # print("[ Top 10 ]")
     # for stat in top_stats[:10]:
     #     print(stat)
-    new_im = PIL.Image.new('RGB', (600, 300), color='white')
-    new_im.paste(pil3d, (0, 0, 300, 300))
+    # new_im = PIL.Image.new('RGB', (600, 600), color='white')
+    new_im = PIL.Image.new('RGB', (300, 300), color='white')
+    # new_im.paste(pil3d, (0, 0, 300, 300))
     try:
         pil2d = generatePIL2d(mol.rdkit_mol, conformer2d)
-        new_im.paste(pil2d, (300, 0, 600, 300))
+        new_im.paste(pil2d, (0, 0, 300, 300))
     except ValueError:
         print("Value error in generate PIL2D. The ")
         return
@@ -72,11 +73,11 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
         font = ImageFont.truetype(os.path.join(dir_path, "Arial.ttf"), 15)
     except OSError:
         font = ImageFont.load_default()
-    draw.text((100, 15), f"3D view. Diam={max_dist:.1f}", font=font, fill='black')
-    draw.text((420, 15), "2D view", font=font, fill='black')
+    # draw.text((100, 15), f"3D view. Diam={max_dist:.1f}", font=font, fill='black')
+    draw.text((100, 15), "2D view", font=font, fill='black')
     new_im.save(save_path, "PNG")
-    buffer.close()
-    pil3d.close()
+    # buffer.close()
+    # pil3d.close()
     new_im.close()
     plt.close('all')  # Close all matplotlib figures to prevent memory leakage
 
