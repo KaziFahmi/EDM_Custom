@@ -13,7 +13,6 @@ from rdkit.Chem import Draw, AllChem
 from rdkit.Geometry import Point3D
 from rdkit import RDLogger
 from sklearn.decomposition import PCA
-import tracemalloc
 from midi.analysis.rdkit_functions import Molecule
 import tracemalloc
 
