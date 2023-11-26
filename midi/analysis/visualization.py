@@ -151,7 +151,8 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         if wandb.run:
             wandb.log({"chain": wandb.Video(gif_path, fps=5, format="gif")}, commit=True)
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
-
+        imgs.clear()
+        all_file_paths.clear()
         print("Chain saved.")
     # draw grid image
     # try:
