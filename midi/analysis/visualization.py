@@ -128,7 +128,6 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         print("Molecule list generated.")
 
         # Extract the positions of the final 2d molecule
-        tracemalloc.start()
         last_mol = mols[-1].rdkit_mol
         AllChem.Compute2DCoords(last_mol)
         coords = []
@@ -137,22 +136,12 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             p = conf.GetAtomPosition(k)
             coords.append([p.x, p.y, p.z])
         conformer2d = torch.Tensor(coords)
-        snapshot = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics('lineno')
-        print("[ Top 10 ]")
-        for stat in top_stats[:10]:
-            print(stat)
-        print("Conformer2d generated.")
-        tracemalloc.stop()
-        tracemalloc.clear_traces()
+ 
         for frame in range(len(mols)):
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
 
 
-        print("[ Top 10 ]")
-        for stat in top_stats[:10]:
-            print(stat)
         # Turn the frames into a gif
         imgs = [imageio.v3.imread(fn) for fn in all_file_paths]
         gif_path = os.path.join(os.path.dirname(path), f"{path.split('/')[-1]}_{i}.gif")
