@@ -15,7 +15,7 @@ from rdkit import RDLogger
 from sklearn.decomposition import PCA
 import tracemalloc
 from midi.analysis.rdkit_functions import Molecule
-
+import tracemalloc
 
 def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='graph', conformer2d=None,
               file_prefix='molecule'):
@@ -50,7 +50,13 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
 def plot_save_molecule(mol, save_path, conformer2d=None):
     buffer = io.BytesIO()
+    tracemalloc.start()
     pil3d, max_dist = generatePIL3d(mol, buffer)
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+    print("[ Top 10 ]")
+    for stat in top_stats[:10]:
+        print(stat)
     new_im = PIL.Image.new('RGB', (600, 300), color='white')
     new_im.paste(pil3d, (0, 0, 300, 300))
     try:
@@ -136,19 +142,14 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         print("Conformer2d generated.")
         tracemalloc.stop()
         tracemalloc.clear_traces()
-        tracemalloc.start()
         for frame in range(len(mols)):
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
 
 
-        snapshot = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics('lineno')
         print("[ Top 10 ]")
         for stat in top_stats[:10]:
             print(stat)
-        tracemalloc.stop()
-        tracemalloc.clear_traces()
         # Turn the frames into a gif
         imgs = [imageio.v3.imread(fn) for fn in all_file_paths]
         gif_path = os.path.join(os.path.dirname(path), f"{path.split('/')[-1]}_{i}.gif")
