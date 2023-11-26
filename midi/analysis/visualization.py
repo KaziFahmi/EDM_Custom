@@ -254,5 +254,5 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     plt.savefig(buffer, format='png', pad_inches=0.0)
     pil_image = PIL.Image.open(buffer)
     ax.clear()
-    plt.close('all')
+    plt.close(fig)
     return pil_image, max_dist
