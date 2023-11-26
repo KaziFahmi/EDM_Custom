@@ -170,9 +170,9 @@ class FullDenoisingDiffusion(pl.LightningModule):
             self.val_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
         snapshot = tracemalloc.take_snapshot()
         top_stats = snapshot.statistics('lineno')
-        print("[ Top 10 ]")
+        self.print("[ Top 10 ]")
         for stat in top_stats[:10]:
-            print(stat)
+            self.print(stat)
         tracemalloc.stop()
         self.print(f"Val epoch {self.current_epoch} ends")
     @torch.no_grad()
