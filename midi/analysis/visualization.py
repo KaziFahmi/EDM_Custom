@@ -254,7 +254,7 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     print("[ Top 10 ]")
     for stat in top_stats[:10]:
         print(stat)
-        
+    tracemalloc.stop()
     plt.tight_layout()
     plt.savefig(buffer, format='png', pad_inches=0.0)
     pil_image = PIL.Image.open(buffer)
