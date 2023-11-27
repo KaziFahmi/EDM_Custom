@@ -164,14 +164,20 @@ class FullDenoisingDiffusion(pl.LightningModule):
                                            chains_to_save=gen.chains_to_save if self.local_rank == 0 else 0,
                                            samples_to_save=gen.samples_to_save if self.local_rank == 0 else 0,
                                            test=False)
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.statistics('lineno')
+            self.print("[ Top 10 - first ]")
+            for stat in top_stats[:10]:
+                self.print(stat)
             print(f'Done on {self.local_rank}. Sampling took {time.time() - start:.2f} seconds\n')
             print(f"Computing sampling metrics on {self.local_rank}...")
             self.val_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
-        snapshot = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics('lineno')
-        self.print("[ Top 10 ]")
-        for stat in top_stats[:10]:
-            self.print(stat)
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.statistics('lineno')
+            self.print("[ Top 10 - second ]")
+            for stat in top_stats[:10]:
+                self.print(stat)
+        
         self.print(f"Val epoch {self.current_epoch} ends")
     @torch.no_grad()
     def on_test_epoch_start(self):

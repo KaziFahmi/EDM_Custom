@@ -81,6 +81,7 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     new_im.close()
     del draw
     plt.clf()
+    plt.cla()
     plt.close('all')  # Close all matplotlib figures to prevent memory leakage
 
 
