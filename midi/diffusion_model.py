@@ -155,7 +155,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
 
 
         self.val_counter += 1
-        tracemalloc.start()
+        # tracemalloc.start()
         if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0):
             self.print(f"Sampling start")
             start = time.time()
@@ -537,11 +537,11 @@ class FullDenoisingDiffusion(pl.LightningModule):
                 current_n_list = [n]
                 max_size = n
         samples.extend(self.sample_batch(n_nodes=current_n_list, test=test))
-        snapshots = tracemalloc.take_snapshot()
-        top_stats = snapshots.statistics('lineno')
-        print("[ Top 10 - second ]")
-        for stat in top_stats[:10]:
-            print(stat)
+        # snapshots = tracemalloc.take_snapshot()
+        # top_stats = snapshots.statistics('lineno')
+        # print("[ Top 10 - second ]")
+        # for stat in top_stats[:10]:
+        #     print(stat)
         return samples
 
     @property
