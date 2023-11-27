@@ -475,7 +475,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         chains_left_to_save = chains_to_save
 
         samples = []
-        tracemalloc.start()
+        # tracemalloc.start()
         # The first graphs are sampled without sorting the sizes, so that the visualizations are not biased
         first_sampling = min(samples_to_generate, max(samples_to_save, chains_to_save))
         if first_sampling > 0:
@@ -504,21 +504,21 @@ class FullDenoisingDiffusion(pl.LightningModule):
             # samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i + 1,
             #                                  save_final=len(current_n_list), keep_chain=chains_save,
             #                                  number_chain_steps=self.number_chain_steps, test=test))
-            snapshots = tracemalloc.take_snapshot()
-            top_stats = snapshots.statistics('lineno')
-            print("[ Top 10 - first ]")
-            for stat in top_stats[:10]:
-                print(stat)
+            # snapshots = tracemalloc.take_snapshot()
+            # top_stats = snapshots.statistics('lineno')
+            # print("[ Top 10 - first ]")
+            # for stat in top_stats[:10]:
+            #     print(stat)
             if samples_to_generate - first_sampling <= 0:
                 return samples
         # plt.cla()
         # plt.clf()
         # plt.close('all')
-        snapshots = tracemalloc.take_snapshot()
-        top_stats = snapshots.statistics('lineno')
-        print("[ Top 10 - first ]")
-        for stat in top_stats[:10]:
-            print(stat)
+        # snapshots = tracemalloc.take_snapshot()
+        # top_stats = snapshots.statistics('lineno')
+        # print("[ Top 10 - first ]")
+        # for stat in top_stats[:10]:
+        #     print(stat)
         # The remaining graphs are sampled in decreasing graph size
         n_nodes = self.node_dist.sample_n(samples_to_generate - first_sampling, self.device)
 
