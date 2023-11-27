@@ -156,17 +156,17 @@ class FullDenoisingDiffusion(pl.LightningModule):
 
         self.val_counter += 1
         # tracemalloc.start()
-        if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0):
-            self.print(f"Sampling start")
-            start = time.time()
-            gen = self.cfg.general
-            samples = self.sample_n_graphs(samples_to_generate=math.ceil(gen.samples_to_generate / max(gen.gpus, 1)),
-                                           chains_to_save=gen.chains_to_save if self.local_rank == 0 else 0,
-                                           samples_to_save=gen.samples_to_save if self.local_rank == 0 else 0,
-                                           test=False)
-            print(f'Done on {self.local_rank}. Sampling took {time.time() - start:.2f} seconds\n')
-            print(f"Computing sampling metrics on {self.local_rank}...")
-            self.val_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
+        # if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0):
+        #     self.print(f"Sampling start")
+        #     start = time.time()
+        #     gen = self.cfg.general
+        #     samples = self.sample_n_graphs(samples_to_generate=math.ceil(gen.samples_to_generate / max(gen.gpus, 1)),
+        #                                    chains_to_save=gen.chains_to_save if self.local_rank == 0 else 0,
+        #                                    samples_to_save=gen.samples_to_save if self.local_rank == 0 else 0,
+        #                                    test=False)
+        #     print(f'Done on {self.local_rank}. Sampling took {time.time() - start:.2f} seconds\n')
+        #     print(f"Computing sampling metrics on {self.local_rank}...")
+        #     self.val_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
         
         self.print(f"Val epoch {self.current_epoch} ends")
     @torch.no_grad()
@@ -494,16 +494,16 @@ class FullDenoisingDiffusion(pl.LightningModule):
                     current_max_size = potential_max_size
                 else:
                     chains_save = max(min(chains_left_to_save, len(current_n_list)), 0)
-                    # samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i,
-                    #                                  save_final=len(current_n_list), keep_chain=chains_save,
-                    #                                  number_chain_steps=self.number_chain_steps, test=test))
+                    samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i,
+                                                     save_final=len(current_n_list), keep_chain=chains_save,
+                                                     number_chain_steps=self.number_chain_steps, test=test))
                     chains_left_to_save -= chains_save
                     current_n_list = [n]
                     current_max_size = n
             chains_save = max(min(chains_left_to_save, len(current_n_list)), 0)
-            # samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i + 1,
-            #                                  save_final=len(current_n_list), keep_chain=chains_save,
-            #                                  number_chain_steps=self.number_chain_steps, test=test))
+            samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i + 1,
+                                             save_final=len(current_n_list), keep_chain=chains_save,
+                                             number_chain_steps=self.number_chain_steps, test=test))
             # snapshots = tracemalloc.take_snapshot()
             # top_stats = snapshots.statistics('lineno')
             # print("[ Top 10 - first ]")
