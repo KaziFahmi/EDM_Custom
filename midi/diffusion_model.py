@@ -453,7 +453,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         # Visualize the final molecules
         current_path = os.getcwd()
         result_path = os.path.join(current_path, f'graphs/epoch{self.current_epoch}_b{batch_id}/')
-        _ = visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
+        visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
         self.print("Visualizing done.")
         plt.cla()
         plt.clf()
@@ -494,16 +494,16 @@ class FullDenoisingDiffusion(pl.LightningModule):
                     current_max_size = potential_max_size
                 else:
                     chains_save = max(min(chains_left_to_save, len(current_n_list)), 0)
-                    samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i,
-                                                     save_final=len(current_n_list), keep_chain=chains_save,
-                                                     number_chain_steps=self.number_chain_steps, test=test))
+                    # samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i,
+                    #                                  save_final=len(current_n_list), keep_chain=chains_save,
+                    #                                  number_chain_steps=self.number_chain_steps, test=test))
                     chains_left_to_save -= chains_save
                     current_n_list = [n]
                     current_max_size = n
             chains_save = max(min(chains_left_to_save, len(current_n_list)), 0)
-            samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i + 1,
-                                             save_final=len(current_n_list), keep_chain=chains_save,
-                                             number_chain_steps=self.number_chain_steps, test=test))
+            # samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i + 1,
+            #                                  save_final=len(current_n_list), keep_chain=chains_save,
+            #                                  number_chain_steps=self.number_chain_steps, test=test))
             snapshots = tracemalloc.take_snapshot()
             top_stats = snapshots.statistics('lineno')
             print("[ Top 10 - first ]")
@@ -511,9 +511,9 @@ class FullDenoisingDiffusion(pl.LightningModule):
                 print(stat)
             if samples_to_generate - first_sampling <= 0:
                 return samples
-        plt.cla()
-        plt.clf()
-        plt.close('all')
+        # plt.cla()
+        # plt.clf()
+        # plt.close('all')
         snapshots = tracemalloc.take_snapshot()
         top_stats = snapshots.statistics('lineno')
         print("[ Top 10 - first ]")
