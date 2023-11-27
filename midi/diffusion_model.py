@@ -511,7 +511,14 @@ class FullDenoisingDiffusion(pl.LightningModule):
                 print(stat)
             if samples_to_generate - first_sampling <= 0:
                 return samples
-
+        plt.cla()
+        plt.clf()
+        plt.close('all')
+        snapshots = tracemalloc.take_snapshot()
+        top_stats = snapshots.statistics('lineno')
+        print("[ Top 10 - first ]")
+        for stat in top_stats[:10]:
+            print(stat)
         # The remaining graphs are sampled in decreasing graph size
         n_nodes = self.node_dist.sample_n(samples_to_generate - first_sampling, self.device)
 
