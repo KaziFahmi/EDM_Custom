@@ -138,7 +138,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         conformer2d = torch.Tensor(coords)
         tracemalloc.start()
         snapshot1 = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics('lineno')
+        top_stats = snapshot1.statistics('lineno')
         print("[ Top 10 1 ]")
         for stat in top_stats[:10]:
             print(stat)
