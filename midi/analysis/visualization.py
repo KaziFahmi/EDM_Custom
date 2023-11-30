@@ -131,9 +131,10 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             p = conf.GetAtomPosition(k)
             coords.append([p.x, p.y, p.z])
         conformer2d = torch.Tensor(coords)
-
+        all_file_paths = []
         for frame in range(len(mols)):
             print(f'Visualizing frame {frame}/{len(mols)}')
+            all_file_paths.clear()
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
 
@@ -148,6 +149,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
 
         if wandb.run:
             wandb.log({"chain": wandb.Video(gif_path, fps=5, format="gif")}, commit=True)
+        imgs.clear()
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
         print("Chain saved.")
         plt.cla()
