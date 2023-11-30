@@ -137,24 +137,23 @@ class FullDenoisingDiffusion(pl.LightningModule):
         self.log_dict(log_dict, on_epoch=True, on_step=False, sync_dist=True)
         if wandb.run:
             wandb.log(log_dict)
+        # print_str = []
+        # for key, val in log_dict.items():
+        #     new_val = f"{val:.2f}"
+        #     print_str.append(f"{key}: {new_val} -- ")
+        # print_str = ''.join(print_str)
+        # print(f"Epoch {self.current_epoch}: {print_str}."[:-4])
 
-        print_str = []
-        for key, val in log_dict.items():
-            new_val = f"{val:.2f}"
-            print_str.append(f"{key}: {new_val} -- ")
-        print_str = ''.join(print_str)
-        print(f"Epoch {self.current_epoch}: {print_str}."[:-4])
+        # # Log val nll with default Lightning logger, so it can be monitored by checkpoint callback
+        # val_nll = metrics[0]
+        # self.log("val/epoch_NLL", val_nll, sync_dist=True)
 
-        # Log val nll with default Lightning logger, so it can be monitored by checkpoint callback
-        val_nll = metrics[0]
-        self.log("val/epoch_NLL", val_nll, sync_dist=True)
-
-        if val_nll < self.best_val_nll:
-            self.best_val_nll = val_nll
-        print('Val loss: %.4f \t Best val loss:  %.4f\n' % (val_nll, self.best_val_nll))
+        # if val_nll < self.best_val_nll:
+        #     self.best_val_nll = val_nll
+        # print('Val loss: %.4f \t Best val loss:  %.4f\n' % (val_nll, self.best_val_nll))
 
 
-        self.val_counter += 1
+        # self.val_counter += 1
         # tracemalloc.start()
         # if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0):
         #     self.print(f"Sampling start")
@@ -443,9 +442,9 @@ class FullDenoisingDiffusion(pl.LightningModule):
                                        f'batch{batch_id}_GR{self.global_rank}')
             os.makedirs(chains_path, exist_ok=True)
 
-            visualizer.visualize_chains(chains_path, chains,
-                                        num_nodes=n_nodes[:keep_chain],
-                                        atom_decoder=self.dataset_infos.atom_decoder)
+            # visualizer.visualize_chains(chains_path, chains,
+            #                             num_nodes=n_nodes[:keep_chain],
+            #                             atom_decoder=self.dataset_infos.atom_decoder)
 
         if save_final > 0:
             self.print(f'Visualizing {save_final} individual molecules...')
@@ -453,7 +452,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         # Visualize the final molecules
         current_path = os.getcwd()
         result_path = os.path.join(current_path, f'graphs/epoch{self.current_epoch}_b{batch_id}/')
-        visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
+        # visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
         self.print("Visualizing done.")
         plt.cla()
         plt.clf()
