@@ -17,6 +17,7 @@ from sklearn.decomposition import PCA
 
 from midi.analysis.rdkit_functions import Molecule
 import gc
+from matplotlib._pylab_helpers import Gcf
 
 def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='graph', conformer2d=None,
               file_prefix='molecule'):
@@ -274,5 +275,11 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     plt.clf()
     plt.cla()
     plt.close('all')
+    fig_nums = plt.get_fignums()
+    print(fig_nums)
+    figs = Gcf.figs.values()
+    axes = []
+    for fig in figs:
+        axes += fig.get_axes()
     gc.collect()
     return pil_image, max_dist
