@@ -132,6 +132,10 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
                                        conformer2d=conformer2d, file_prefix='frame')
 
         snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
         top_stats = snapshot.compare_to(snapshot1, 'lineno')
         print("[ Top 10 ]")
         for stat in top_stats[:10]:
@@ -150,6 +154,10 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
         print("Chain saved.")
         snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
         top_stats = snapshot.compare_to(snapshot1, 'lineno')
         print("[ Top 10 ]")
         for stat in top_stats[:10]:
