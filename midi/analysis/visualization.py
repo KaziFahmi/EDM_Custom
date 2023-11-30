@@ -13,8 +13,9 @@ from rdkit.Chem import Draw, AllChem
 from rdkit.Geometry import Point3D
 from rdkit import RDLogger
 from sklearn.decomposition import PCA
+
 from midi.analysis.rdkit_functions import Molecule
-import tracemalloc
+
 
 def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='graph', conformer2d=None,
               file_prefix='molecule'):
@@ -44,40 +45,37 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
         if log is not None and wandb.run:
             wandb.log({log: wandb.Image(file_path)}, commit=True)
+
     return all_file_paths
 
 
 def plot_save_molecule(mol, save_path, conformer2d=None):
-    # buffer = io.BytesIO()
-    # pil3d, max_dist = generatePIL3d(mol, buffer)
-    # new_im = PIL.Image.new('RGB', (600, 300), color='white')
-    # new_im.paste(pil3d, (0, 0, 300, 300))
-    # try:
-    #     pil2d = generatePIL2d(mol.rdkit_mol, conformer2d)
-    #     new_im.paste(pil2d, (300, 0, 600, 300))
-    # except ValueError:
-    #     print("Value error in generate PIL2D. The ")
-    #     return
+    buffer = io.BytesIO()
+    pil3d, max_dist = generatePIL3d(mol, buffer)
+    new_im = PIL.Image.new('RGB', (600, 300), color='white')
+    new_im.paste(pil3d, (0, 0, 300, 300))
+    try:
+        pil2d = generatePIL2d(mol.rdkit_mol, conformer2d)
+        new_im.paste(pil2d, (300, 0, 600, 300))
+    except ValueError:
+        print("Value error in generate PIL2D. The ")
+        return
 
-    # draw = ImageDraw.Draw(new_im)
-    # real_path = os.path.realpath(__file__)
-    # dir_path = os.path.dirname(real_path)
-    # try:        # This normally works but sometimes randomly crashes
-    #     font = ImageFont.truetype(os.path.join(dir_path, "Arial.ttf"), 15)
-    # except OSError:
-    #     font = ImageFont.load_default()
-    # draw.text((100, 15), f"3D view. Diam={max_dist:.1f}", font=font, fill='black')
-    # draw.text((420, 15), "2D view", font=font, fill='black')
-    # new_im.save(save_path, "PNG")
-    # buffer.close()
-    # pil3d.close()
-    # pil2d.close()
-    # new_im.close()
-    # plt.cla()
-    # plt.clf()
-    # plt.close('all')
-    print("Saving molecule")
-
+    draw = ImageDraw.Draw(new_im)
+    real_path = os.path.realpath(__file__)
+    dir_path = os.path.dirname(real_path)
+    try:        # This normally works but sometimes randomly crashes
+        font = ImageFont.truetype(os.path.join(dir_path, "Arial.ttf"), 15)
+    except OSError:
+        font = ImageFont.load_default()
+    draw.text((100, 15), f"3D view. Diam={max_dist:.1f}", font=font, fill='black')
+    draw.text((420, 15), "2D view", font=font, fill='black')
+    new_im.save(save_path, "PNG")
+    buffer.close()
+    plt.cla()
+    plt.clf()
+    plt.close("all")
+    new_im.close()
 
 
 def generatePIL2d(mol, conformer2d=None):
@@ -88,14 +86,11 @@ def generatePIL2d(mol, conformer2d=None):
     conf = mol.GetConformer()
     if conformer2d is not None:
         conformer2d = conformer2d.double()
-        for j, _ in enumerate(mol.GetAtoms()):
+        for j, atom in enumerate(mol.GetAtoms()):
             x, y, z = conformer2d[j, 0].item(), conformer2d[j, 1].item(), conformer2d[j, 2].item()
 
             conf.SetAtomPosition(j, Point3D(x, y, z))
-    img = Draw.MolToImage(mol)
-    pil2d = PIL.Image.fromarray(np.array(img))
-    img.close()
-    return pil2d
+    return Draw.MolToImage(mol)
 
 
 def visualize_chains(path, chain, atom_decoder, num_nodes):
@@ -134,10 +129,11 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             p = conf.GetAtomPosition(k)
             coords.append([p.x, p.y, p.z])
         conformer2d = torch.Tensor(coords)
- 
+
         for frame in range(len(mols)):
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
+
 
 
         # Turn the frames into a gif
@@ -150,12 +146,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         if wandb.run:
             wandb.log({"chain": wandb.Video(gif_path, fps=5, format="gif")}, commit=True)
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
-        imgs.clear()
-        all_file_paths.clear()
         print("Chain saved.")
-    plt.clf()
-    plt.cla()
-    plt.close('all')
     # draw grid image
     # try:
     #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
@@ -241,12 +232,15 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     ax.set_xlim(-axis_lim, axis_lim)
     ax.set_ylim(-axis_lim, axis_lim)
     ax.set_zlim(-axis_lim, axis_lim)
+
     max_dist = plot_molecule3d(ax, positions, atom_types, edge_types, alpha, hex_bg_color, num_atom_types)
+
     plt.tight_layout()
     plt.savefig(buffer, format='png', pad_inches=0.0)
     pil_image = PIL.Image.open(buffer)
+    plt.close()
     ax.clear()
     plt.cla()
-    plt.clf() 
-    plt.close(fig)  # Close the figure to prevent memory leakage
+    plt.clf()
+    plt.close("all")
     return pil_image, max_dist

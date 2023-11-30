@@ -1,7 +1,6 @@
 import time
 import os
 import math
-from matplotlib import pyplot as plt
 import numpy as np
 
 import torch
@@ -25,7 +24,7 @@ from midi.metrics.molecular_metrics import TrainMolecularMetrics, SamplingMetric
 from midi.diffusion.extra_features import ExtraFeatures
 from midi.analysis.rdkit_functions import Molecule
 from midi.datasets.adaptive_loader import effective_batch_size
-import tracemalloc
+import matplotlib.pyplot as plt
 
 class FullDenoisingDiffusion(pl.LightningModule):
     model_dtype = torch.float32
@@ -118,7 +117,6 @@ class FullDenoisingDiffusion(pl.LightningModule):
         self.val_nll.reset()
         self.val_metrics.reset()
 
-    @torch.no_grad()
     def validation_step(self, data, i):
         dense_data = utils.to_dense(data, self.dataset_infos)
         z_t = self.noise_model.apply_noise(dense_data)
@@ -126,7 +124,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         pred = self.forward(z_t, extra_data)
         nll, log_dict = self.compute_val_loss(pred, z_t, clean_data=dense_data, test=False)
         return {'loss': nll}, log_dict
-    @torch.no_grad()
+
     def on_validation_epoch_end(self) -> None:
         metrics = [self.val_nll.compute(), self.val_metrics.compute()]
         log_dict = {"val/epoch_NLL": metrics[0],
@@ -137,44 +135,47 @@ class FullDenoisingDiffusion(pl.LightningModule):
         self.log_dict(log_dict, on_epoch=True, on_step=False, sync_dist=True)
         if wandb.run:
             wandb.log(log_dict)
-        # print_str = []
-        # for key, val in log_dict.items():
-        #     new_val = f"{val:.2f}"
-        #     print_str.append(f"{key}: {new_val} -- ")
-        # print_str = ''.join(print_str)
-        # print(f"Epoch {self.current_epoch}: {print_str}."[:-4])
 
-        # # Log val nll with default Lightning logger, so it can be monitored by checkpoint callback
-        # val_nll = metrics[0]
-        # self.log("val/epoch_NLL", val_nll, sync_dist=True)
+        print_str = []
+        for key, val in log_dict.items():
+            new_val = f"{val:.2f}"
+            print_str.append(f"{key}: {new_val} -- ")
+        print_str = ''.join(print_str)
+        print(f"Epoch {self.current_epoch}: {print_str}."[:-4])
 
-        # if val_nll < self.best_val_nll:
-        #     self.best_val_nll = val_nll
-        # print('Val loss: %.4f \t Best val loss:  %.4f\n' % (val_nll, self.best_val_nll))
+        # Log val nll with default Lightning logger, so it can be monitored by checkpoint callback
+        val_nll = metrics[0]
+        self.log("val/epoch_NLL", val_nll, sync_dist=True)
+
+        if val_nll < self.best_val_nll:
+            self.best_val_nll = val_nll
+        print('Val loss: %.4f \t Best val loss:  %.4f\n' % (val_nll, self.best_val_nll))
 
 
-        # self.val_counter += 1
-        # tracemalloc.start()
-        # if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0):
-        #     self.print(f"Sampling start")
-        #     start = time.time()
-        #     gen = self.cfg.general
-        #     samples = self.sample_n_graphs(samples_to_generate=math.ceil(gen.samples_to_generate / max(gen.gpus, 1)),
-        #                                    chains_to_save=gen.chains_to_save if self.local_rank == 0 else 0,
-        #                                    samples_to_save=gen.samples_to_save if self.local_rank == 0 else 0,
-        #                                    test=False)
-        #     print(f'Done on {self.local_rank}. Sampling took {time.time() - start:.2f} seconds\n')
-        #     print(f"Computing sampling metrics on {self.local_rank}...")
-        #     self.val_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
-        
+        self.val_counter += 1
+        if self.name == "debug" or (self.val_counter % self.cfg.general.sample_every_val == 0 and
+                                    self.current_epoch > 0):
+            self.print(f"Sampling start")
+            start = time.time()
+            gen = self.cfg.general
+            samples = self.sample_n_graphs(samples_to_generate=math.ceil(gen.samples_to_generate / max(gen.gpus, 1)),
+                                           chains_to_save=gen.chains_to_save if self.local_rank == 0 else 0,
+                                           samples_to_save=gen.samples_to_save if self.local_rank == 0 else 0,
+                                           test=False)
+            print(f'Done on {self.local_rank}. Sampling took {time.time() - start:.2f} seconds\n')
+            print(f"Computing sampling metrics on {self.local_rank}...")
+            self.val_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
         self.print(f"Val epoch {self.current_epoch} ends")
-    @torch.no_grad()
+        plt.cla()
+        plt.clf()
+        plt.close("all")
+
     def on_test_epoch_start(self):
         if self.local_rank == 0:
             utils.setup_wandb(self.cfg)
         self.test_nll.reset()
         self.test_metrics.reset()
-    @torch.no_grad()
+
     def test_step(self, data, i):
         dense_data = utils.to_dense(data, self.dataset_infos)
         z_t = self.noise_model.apply_noise(dense_data)
@@ -182,7 +183,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         pred = self.forward(z_t, extra_data)
         nll, log_dict = self.compute_val_loss(pred, z_t, clean_data=dense_data, test=True)
         return {'loss': nll}, log_dict
-    @torch.no_grad()
+
     def on_test_epoch_end(self) -> None:
         """ Measure likelihood on a test set and compute stability metrics. """
         metrics = [self.test_nll.compute(), self.test_metrics.compute()]
@@ -254,6 +255,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         self.test_sampling_metrics(samples, self.name, self.current_epoch, self.local_rank)
         print(f'Done. Sampling took {time.time() - start:.2f} seconds\n')
         print(f"Test ends.")
+
     def kl_prior(self, clean_data, node_mask):
         """Computes the KL between q(z1 | x) and the prior p(z1) = Normal(0, 1).
 
@@ -330,7 +332,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
         prob_pred.pos = prefactor * pred.pos
         metrics = (self.test_metrics if test else self.val_metrics)(prob_pred, prob_true)
         return self.T * (metrics['PosMSE'] + metrics['XKl'] + metrics['ChargesKl'] + metrics['EKl'])
-    @torch.no_grad()
+
     def compute_val_loss(self, pred, z_t, clean_data, test=False):
         """Computes an estimator for the variational lower bound, or the simple loss (MSE).
            pred: (batch_size, n, total_features)
@@ -442,9 +444,9 @@ class FullDenoisingDiffusion(pl.LightningModule):
                                        f'batch{batch_id}_GR{self.global_rank}')
             os.makedirs(chains_path, exist_ok=True)
 
-            # visualizer.visualize_chains(chains_path, chains,
-            #                             num_nodes=n_nodes[:keep_chain],
-            #                             atom_decoder=self.dataset_infos.atom_decoder)
+            visualizer.visualize_chains(chains_path, chains,
+                                        num_nodes=n_nodes[:keep_chain],
+                                        atom_decoder=self.dataset_infos.atom_decoder)
 
         if save_final > 0:
             self.print(f'Visualizing {save_final} individual molecules...')
@@ -452,11 +454,8 @@ class FullDenoisingDiffusion(pl.LightningModule):
         # Visualize the final molecules
         current_path = os.getcwd()
         result_path = os.path.join(current_path, f'graphs/epoch{self.current_epoch}_b{batch_id}/')
-        # visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
+        _ = visualizer.visualize(result_path, molecule_list, num_molecules_to_visualize=save_final)
         self.print("Visualizing done.")
-        plt.cla()
-        plt.clf()
-        plt.close('all')
         return molecule_list
 
     def sample_zs_from_zt(self, z_t, s_int):
@@ -474,7 +473,6 @@ class FullDenoisingDiffusion(pl.LightningModule):
         chains_left_to_save = chains_to_save
 
         samples = []
-        # tracemalloc.start()
         # The first graphs are sampled without sorting the sizes, so that the visualizations are not biased
         first_sampling = min(samples_to_generate, max(samples_to_save, chains_to_save))
         if first_sampling > 0:
@@ -503,21 +501,9 @@ class FullDenoisingDiffusion(pl.LightningModule):
             samples.extend(self.sample_batch(n_nodes=current_n_list, batch_id=i + 1,
                                              save_final=len(current_n_list), keep_chain=chains_save,
                                              number_chain_steps=self.number_chain_steps, test=test))
-            # snapshots = tracemalloc.take_snapshot()
-            # top_stats = snapshots.statistics('lineno')
-            # print("[ Top 10 - first ]")
-            # for stat in top_stats[:10]:
-            #     print(stat)
             if samples_to_generate - first_sampling <= 0:
                 return samples
-        # plt.cla()
-        # plt.clf()
-        # plt.close('all')
-        # snapshots = tracemalloc.take_snapshot()
-        # top_stats = snapshots.statistics('lineno')
-        # print("[ Top 10 - first ]")
-        # for stat in top_stats[:10]:
-        #     print(stat)
+
         # The remaining graphs are sampled in decreasing graph size
         n_nodes = self.node_dist.sample_n(samples_to_generate - first_sampling, self.device)
 
@@ -536,11 +522,7 @@ class FullDenoisingDiffusion(pl.LightningModule):
                 current_n_list = [n]
                 max_size = n
         samples.extend(self.sample_batch(n_nodes=current_n_list, test=test))
-        # snapshots = tracemalloc.take_snapshot()
-        # top_stats = snapshots.statistics('lineno')
-        # print("[ Top 10 - second ]")
-        # for stat in top_stats[:10]:
-        #     print(stat)
+
         return samples
 
     @property
