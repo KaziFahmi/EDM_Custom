@@ -76,6 +76,8 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     plt.clf()
     plt.close("all")
     new_im.close()
+    pil3d.close()
+    pil2d.close()
 
 
 def generatePIL2d(mol, conformer2d=None):
@@ -131,6 +133,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         conformer2d = torch.Tensor(coords)
 
         for frame in range(len(mols)):
+            print(f'Visualizing frame {frame}/{len(mols)}')
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
 
@@ -241,9 +244,9 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     plt.tight_layout()
     plt.savefig(buffer, format='png', pad_inches=0.0)
     pil_image = PIL.Image.open(buffer)
-    plt.close()
     ax.clear()
     plt.cla()
     plt.clf()
+    plt.close(fig)
     plt.close("all")
     return pil_image, max_dist
