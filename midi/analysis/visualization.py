@@ -1,5 +1,6 @@
 import os
 import io
+import tracemalloc
 import PIL
 from PIL import ImageFont
 from PIL import ImageDraw
@@ -125,10 +126,16 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             p = conf.GetAtomPosition(k)
             coords.append([p.x, p.y, p.z])
         conformer2d = torch.Tensor(coords)
-
+        tracemalloc.start()
+        snapshot1 = tracemalloc.take_snapshot()
         all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
 
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.compare_to(snapshot1, 'lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
 
 
         # Turn the frames into a gif
@@ -142,6 +149,11 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             wandb.log({"chain": wandb.Video(gif_path, fps=5, format="gif")}, commit=True)
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
         print("Chain saved.")
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.compare_to(snapshot1, 'lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
     # draw grid image
     # try:
     #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
