@@ -48,35 +48,35 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
 
 def plot_save_molecule(mol, save_path, conformer2d=None):
-    buffer = io.BytesIO()
-    pil3d, max_dist = generatePIL3d(mol, buffer)
-    new_im = PIL.Image.new('RGB', (600, 300), color='white')
-    new_im.paste(pil3d, (0, 0, 300, 300))
-    try:
-        pil2d = generatePIL2d(mol.rdkit_mol, conformer2d)
-        new_im.paste(pil2d, (300, 0, 600, 300))
-    except ValueError:
-        print("Value error in generate PIL2D. The ")
-        return
+    # buffer = io.BytesIO()
+    # pil3d, max_dist = generatePIL3d(mol, buffer)
+    # new_im = PIL.Image.new('RGB', (600, 300), color='white')
+    # new_im.paste(pil3d, (0, 0, 300, 300))
+    # try:
+    #     pil2d = generatePIL2d(mol.rdkit_mol, conformer2d)
+    #     new_im.paste(pil2d, (300, 0, 600, 300))
+    # except ValueError:
+    #     print("Value error in generate PIL2D. The ")
+    #     return
 
-    draw = ImageDraw.Draw(new_im)
-    real_path = os.path.realpath(__file__)
-    dir_path = os.path.dirname(real_path)
-    try:        # This normally works but sometimes randomly crashes
-        font = ImageFont.truetype(os.path.join(dir_path, "Arial.ttf"), 15)
-    except OSError:
-        font = ImageFont.load_default()
-    draw.text((100, 15), f"3D view. Diam={max_dist:.1f}", font=font, fill='black')
-    draw.text((420, 15), "2D view", font=font, fill='black')
-    new_im.save(save_path, "PNG")
-    buffer.close()
-    pil3d.close()
-    pil2d.close()
-    new_im.close()
-    plt.cla()
-    plt.clf()
-    plt.close('all')
-    
+    # draw = ImageDraw.Draw(new_im)
+    # real_path = os.path.realpath(__file__)
+    # dir_path = os.path.dirname(real_path)
+    # try:        # This normally works but sometimes randomly crashes
+    #     font = ImageFont.truetype(os.path.join(dir_path, "Arial.ttf"), 15)
+    # except OSError:
+    #     font = ImageFont.load_default()
+    # draw.text((100, 15), f"3D view. Diam={max_dist:.1f}", font=font, fill='black')
+    # draw.text((420, 15), "2D view", font=font, fill='black')
+    # new_im.save(save_path, "PNG")
+    # buffer.close()
+    # pil3d.close()
+    # pil2d.close()
+    # new_im.close()
+    # plt.cla()
+    # plt.clf()
+    # plt.close('all')
+
 
 
 def generatePIL2d(mol, conformer2d=None):
