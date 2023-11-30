@@ -135,17 +135,15 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         all_file_paths = []
         tracemalloc.start()
         snapshot1 = tracemalloc.take_snapshot()
-        all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
-                                    conformer2d=conformer2d, file_prefix='frame')
+        for frame in range(len(mols)):
+            all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
+                                       conformer2d=conformer2d, file_prefix='frame')
 
         snapshot2 = tracemalloc.take_snapshot()
         top_stats = snapshot2.compare_to(snapshot1, 'lineno')
         print("[ Top 10 ]")
         for stat in top_stats[:10]:
             print(stat)
-        tracemalloc.stop()
-            
-
 
 
 
@@ -161,6 +159,13 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         imgs.clear()
             # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
         print("Chain saved.")
+        snapshot2 = tracemalloc.take_snapshot()
+        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+        print("[ Top 10  v2 ]")
+        for stat in top_stats[:10]:
+            print(stat)
+        tracemalloc.stop()
+
     # draw grid image
     # try:
     #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
