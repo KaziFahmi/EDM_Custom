@@ -76,6 +76,7 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     # plt.cla()
     # plt.clf()
     # plt.close('all')
+    print("Saving molecule")
 
 
 
