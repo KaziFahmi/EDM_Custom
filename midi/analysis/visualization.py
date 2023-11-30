@@ -132,13 +132,14 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         conformer2d = torch.Tensor(coords)
         all_file_paths = []
         tracemalloc.start()
+        snapshot1 = tracemalloc.take_snapshot()
         for frame in range(len(mols)):
             print(f'Visualizing frame {frame}/{len(mols)}')
             all_file_paths.clear()
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
-        snapshot = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics('lineno')
+        snapshot2 = tracemalloc.take_snapshot()
+        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
         print("[ Top 10 ]")
         for stat in top_stats[:10]:
             print(stat)
