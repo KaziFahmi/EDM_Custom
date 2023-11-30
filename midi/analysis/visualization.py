@@ -72,6 +72,7 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     draw.text((100, 15), f"3D view. Diam={max_dist:.1f}", font=font, fill='black')
     draw.text((420, 15), "2D view", font=font, fill='black')
     new_im.save(save_path, "PNG")
+    new_im.close()
     buffer.close()
     gc.collect()
 
@@ -239,12 +240,5 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     plt.clf()
     plt.cla()
     plt.close('all')
-    fig_nums = plt.get_fignums()
-    print(fig_nums)
-    figs = Gcf.figs.values()
-    axes = []
-    for fig in figs:
-        axes += fig.get_axes()
-    print(axes)
     gc.collect()
     return pil_image, max_dist
