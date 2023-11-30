@@ -98,7 +98,7 @@ def generatePIL2d(mol, conformer2d=None):
 
 def visualize_chains(path, chain, atom_decoder, num_nodes):
     """ visualize the chain corresponding to one molecule"""
-    with RDLogger.silentLogger():
+    with RDLogger.DisableLog('rdApp.*'):
     # convert graphs to the rdkit molecules
 
         pca = PCA(n_components=3)
