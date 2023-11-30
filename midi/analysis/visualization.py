@@ -281,5 +281,6 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     axes = []
     for fig in figs:
         axes += fig.get_axes()
+    print(axes)
     gc.collect()
     return pil_image, max_dist
