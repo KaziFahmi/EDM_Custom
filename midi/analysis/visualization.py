@@ -15,7 +15,7 @@ from rdkit import RDLogger
 from sklearn.decomposition import PCA
 
 from midi.analysis.rdkit_functions import Molecule
-
+import tracemalloc
 
 def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='graph', conformer2d=None,
               file_prefix='molecule'):
@@ -132,11 +132,20 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             coords.append([p.x, p.y, p.z])
         conformer2d = torch.Tensor(coords)
         all_file_paths = []
+        tracemalloc.start()
         for frame in range(len(mols)):
             print(f'Visualizing frame {frame}/{len(mols)}')
             all_file_paths.clear()
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.statistics('lineno')
+            print("[ Top 10 ]")
+            for stat in top_stats[:10]:
+                print(stat)
+        tracemalloc.stop()
+            
+
 
 
 
