@@ -16,7 +16,7 @@ from rdkit import RDLogger
 from sklearn.decomposition import PCA
 
 from midi.analysis.rdkit_functions import Molecule
-
+import gc
 
 def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='graph', conformer2d=None,
               file_prefix='molecule'):
@@ -83,6 +83,7 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     draw.text((420, 15), "2D view", font=font, fill='black')
     new_im.save(save_path, "PNG")
     buffer.close()
+    gc.collect()
 
 
 def generatePIL2d(mol, conformer2d=None):
@@ -176,6 +177,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         print("[ Top 10 7]")
         for stat in top_stats[:10]:
             print(stat)
+        gc.collect()
     # draw grid image
     # try:
     #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
@@ -272,4 +274,5 @@ def generatePIL3d(mol, buffer, bg='white', alpha=1.):
     plt.clf()
     plt.cla()
     plt.close('all')
+    gc.collect()
     return pil_image, max_dist
