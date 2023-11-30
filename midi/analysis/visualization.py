@@ -50,8 +50,9 @@ def visualize(path: str, molecules: list, num_molecules_to_visualize: int, log='
 
 
 def plot_save_molecule(mol, save_path, conformer2d=None):
-    buffer = io.BytesIO()
-    pil3d, max_dist = generatePIL3d(mol, buffer)
+    with io.BytesIO() as buffer:
+        pil3d, max_dist = generatePIL3d(mol, buffer)
+    
     new_im = PIL.Image.new('RGB', (600, 300), color='white')
     new_im.paste(pil3d, (0, 0, 300, 300))
     try:
@@ -71,13 +72,9 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     draw.text((100, 15), f"3D view. Diam={max_dist:.1f}", font=font, fill='black')
     draw.text((420, 15), "2D view", font=font, fill='black')
     new_im.save(save_path, "PNG")
-    buffer.close()
-    plt.cla()
-    plt.clf()
-    plt.close("all")
-    new_im.close()
     pil3d.close()
-    pil2d.close()
+    new_im.close()
+
 
 
 def generatePIL2d(mol, conformer2d=None):
@@ -92,7 +89,9 @@ def generatePIL2d(mol, conformer2d=None):
             x, y, z = conformer2d[j, 0].item(), conformer2d[j, 1].item(), conformer2d[j, 2].item()
 
             conf.SetAtomPosition(j, Point3D(x, y, z))
-    return Draw.MolToImage(mol)
+    img = Draw.MolToImage(mol)
+    conf = None
+    return img
 
 
 def visualize_chains(path, chain, atom_decoder, num_nodes):
@@ -138,11 +137,11 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
             all_file_paths.clear()
             all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
                                        conformer2d=conformer2d, file_prefix='frame')
-            snapshot = tracemalloc.take_snapshot()
-            top_stats = snapshot.statistics('lineno')
-            print("[ Top 10 ]")
-            for stat in top_stats[:10]:
-                print(stat)
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
         tracemalloc.stop()
             
 
