@@ -98,76 +98,76 @@ def generatePIL2d(mol, conformer2d=None):
 
 def visualize_chains(path, chain, atom_decoder, num_nodes):
     """ visualize the chain corresponding to one molecule"""
-    with RDLogger.DisableLog('rdApp.*'):
+    RDLogger.DisableLog('rdApp.*')
     # convert graphs to the rdkit molecules
 
-        pca = PCA(n_components=3)
+    pca = PCA(n_components=3)
 
-        for i in range(chain.X.size(1)):        # Iterate over the molecules
-            print(f'Visualizing chain {i}/{chain.X.size(1)}')
-            result_path = os.path.join(path, f'chain_{i}')
+    for i in range(chain.X.size(1)):        # Iterate over the molecules
+        print(f'Visualizing chain {i}/{chain.X.size(1)}')
+        result_path = os.path.join(path, f'chain_{i}')
 
-            chain_atoms = chain.X[:, i][:, :num_nodes[i]].long()
-            chain_charges = chain.charges[:, i][:, :num_nodes[i]].long()
-            chain_bonds = chain.E[:, i][:, :num_nodes[i], :][:, :, :num_nodes[i]].long()
-            chain_positions = chain.pos[:, i, :][:, :num_nodes[i]]
+        chain_atoms = chain.X[:, i][:, :num_nodes[i]].long()
+        chain_charges = chain.charges[:, i][:, :num_nodes[i]].long()
+        chain_bonds = chain.E[:, i][:, :num_nodes[i], :][:, :, :num_nodes[i]].long()
+        chain_positions = chain.pos[:, i, :][:, :num_nodes[i]]
 
-            # Transform the positions using PCA to align best to the final molecule
-            if chain_positions[-1].shape[0] > 2:
-                pca.fit(chain_positions[-1])
-            mols = []
-            for j in range(chain_atoms.shape[0]):
-                pos = pca.transform(chain_positions[j]) if chain_positions[-1].shape[0] > 2 else chain_positions[j].numpy()
-                mols.append(Molecule(atom_types=chain_atoms[j], charges=chain_charges[j], bond_types=chain_bonds[j],
-                                    positions=torch.from_numpy(pos).to(chain_atoms.device),
-                                    atom_decoder=atom_decoder))
-            print("Molecule list generated.")
+        # Transform the positions using PCA to align best to the final molecule
+        if chain_positions[-1].shape[0] > 2:
+            pca.fit(chain_positions[-1])
+        mols = []
+        for j in range(chain_atoms.shape[0]):
+            pos = pca.transform(chain_positions[j]) if chain_positions[-1].shape[0] > 2 else chain_positions[j].numpy()
+            mols.append(Molecule(atom_types=chain_atoms[j], charges=chain_charges[j], bond_types=chain_bonds[j],
+                                positions=torch.from_numpy(pos).to(chain_atoms.device),
+                                atom_decoder=atom_decoder))
+        print("Molecule list generated.")
 
-            # Extract the positions of the final 2d molecule
-            last_mol = mols[-1].rdkit_mol
-            AllChem.Compute2DCoords(last_mol)
-            coords = []
-            conf = last_mol.GetConformer()
-            for k, atom in enumerate(last_mol.GetAtoms()):
-                p = conf.GetAtomPosition(k)
-                coords.append([p.x, p.y, p.z])
-            conformer2d = torch.Tensor(coords)
-            all_file_paths = []
-            tracemalloc.start()
-            snapshot1 = tracemalloc.take_snapshot()
-            all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
-                                       conformer2d=conformer2d, file_prefix='frame')
+        # Extract the positions of the final 2d molecule
+        last_mol = mols[-1].rdkit_mol
+        AllChem.Compute2DCoords(last_mol)
+        coords = []
+        conf = last_mol.GetConformer()
+        for k, atom in enumerate(last_mol.GetAtoms()):
+            p = conf.GetAtomPosition(k)
+            coords.append([p.x, p.y, p.z])
+        conformer2d = torch.Tensor(coords)
+        all_file_paths = []
+        tracemalloc.start()
+        snapshot1 = tracemalloc.take_snapshot()
+        all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
+                                    conformer2d=conformer2d, file_prefix='frame')
 
-            snapshot2 = tracemalloc.take_snapshot()
-            top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-            print("[ Top 10 ]")
-            for stat in top_stats[:10]:
-                print(stat)
-            tracemalloc.stop()
-                
-
-
+        snapshot2 = tracemalloc.take_snapshot()
+        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+        print("[ Top 10 ]")
+        for stat in top_stats[:10]:
+            print(stat)
+        tracemalloc.stop()
+            
 
 
-            # Turn the frames into a gif
-            imgs = [imageio.v3.imread(fn) for fn in all_file_paths]
-            gif_path = os.path.join(os.path.dirname(path), f"{path.split('/')[-1]}_{i}.gif")
-            print(f'Saving the gif at {gif_path}.')
-            imgs.extend([imgs[-1]] * 10)
-            imageio.mimsave(gif_path, imgs, subrectangles=True, duration=200)
 
-            if wandb.run:
-                wandb.log({"chain": wandb.Video(gif_path, fps=5, format="gif")}, commit=True)
-            imgs.clear()
-                # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
-            print("Chain saved.")
-        # draw grid image
-        # try:
-        #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
-        #     img.save(os.path.join(path, f"{path.split('/')[-1]}_grid_image.png"))
-        # except Chem.rdchem.KekulizeException:
-        #     print("Can't kekulize molecule")
-        # return mols
+
+        # Turn the frames into a gif
+        imgs = [imageio.v3.imread(fn) for fn in all_file_paths]
+        gif_path = os.path.join(os.path.dirname(path), f"{path.split('/')[-1]}_{i}.gif")
+        print(f'Saving the gif at {gif_path}.')
+        imgs.extend([imgs[-1]] * 10)
+        imageio.mimsave(gif_path, imgs, subrectangles=True, duration=200)
+
+        if wandb.run:
+            wandb.log({"chain": wandb.Video(gif_path, fps=5, format="gif")}, commit=True)
+        imgs.clear()
+            # trainer.logger.experiment.log({'chain': [wandb.Video(gif_path, caption=gif_path, format="gif")]})
+        print("Chain saved.")
+    # draw grid image
+    # try:
+    #     img = Draw.MolsToGridImage(mols, molsPerRow=10, subImgSize=(200, 200))
+    #     img.save(os.path.join(path, f"{path.split('/')[-1]}_grid_image.png"))
+    # except Chem.rdchem.KekulizeException:
+    #     print("Can't kekulize molecule")
+    # return mols
 
 
 def plot_molecule3d(ax, positions, atom_types, edge_types, alpha, hex_bg_color, num_atom_types):
