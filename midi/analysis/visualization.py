@@ -54,13 +54,13 @@ def plot_save_molecule(mol, save_path, conformer2d=None):
     buffer = io.BytesIO()
     snapshot = tracemalloc.take_snapshot()
     top_stats = snapshot.statistics('lineno')
-    print("[ Top 10 ]")
+    print("[ Top 10 4 ]")
     for stat in top_stats[:10]:
         print(stat)
     pil3d, max_dist = generatePIL3d(mol, buffer)
     snapshot = tracemalloc.take_snapshot()
     top_stats = snapshot.statistics('lineno')
-    print("[ Top 10 ]")
+    print("[ Top 10 5]")
     for stat in top_stats[:10]:
         print(stat)
     new_im = PIL.Image.new('RGB', (600, 300), color='white')
@@ -139,7 +139,7 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         tracemalloc.start()
         snapshot1 = tracemalloc.take_snapshot()
         top_stats = snapshot.statistics('lineno')
-        print("[ Top 10 ]")
+        print("[ Top 10 1 ]")
         for stat in top_stats[:10]:
             print(stat)
         all_file_paths = visualize(result_path, mols, num_molecules_to_visualize=-1, log=None,
@@ -147,11 +147,11 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
 
         snapshot = tracemalloc.take_snapshot()
         top_stats = snapshot.statistics('lineno')
-        print("[ Top 10 ]")
+        print("[ Top 10 2]")
         for stat in top_stats[:10]:
             print(stat)
         top_stats = snapshot.compare_to(snapshot1, 'lineno')
-        print("[ Top 10 ]")
+        print("[ Top 10 3]")
         for stat in top_stats[:10]:
             print(stat)
 
@@ -169,11 +169,11 @@ def visualize_chains(path, chain, atom_decoder, num_nodes):
         print("Chain saved.")
         snapshot = tracemalloc.take_snapshot()
         top_stats = snapshot.statistics('lineno')
-        print("[ Top 10 ]")
+        print("[ Top 10 6]")
         for stat in top_stats[:10]:
             print(stat)
         top_stats = snapshot.compare_to(snapshot1, 'lineno')
-        print("[ Top 10 ]")
+        print("[ Top 10 7]")
         for stat in top_stats[:10]:
             print(stat)
     # draw grid image
