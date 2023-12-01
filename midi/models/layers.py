@@ -14,6 +14,7 @@ class PositionsMLP(nn.Module):
         print(pos.shape)
         norm = torch.norm(pos, dim=-1, keepdim=True)           # bs, n, 1
         new_norm = self.mlp(norm)                              # bs, n, 1
+        print(new_norm.shape,"Norm shape")
         new_pos = pos * new_norm / (norm + self.eps)
         new_pos = new_pos * node_mask.unsqueeze(-1)
         new_pos = new_pos - torch.mean(new_pos, dim=1, keepdim=True)
