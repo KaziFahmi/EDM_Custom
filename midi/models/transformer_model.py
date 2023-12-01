@@ -377,7 +377,7 @@ class GraphTransformer(nn.Module):
         X_to_out = X[..., :self.out_dim_X + self.out_dim_charges]
         E_to_out = data.E[..., :self.out_dim_E]
         y_to_out = data.y[..., :self.out_dim_y]
-
+        print(data.pos.shape)
         new_E = self.mlp_in_E(data.E)
         new_E = (new_E + new_E.transpose(1, 2)) / 2
         features = utils.PlaceHolder(X=self.mlp_in_X(X), E=new_E, y=self.mlp_in_y(data.y), charges=None,
