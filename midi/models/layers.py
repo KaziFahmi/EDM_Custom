@@ -7,14 +7,17 @@ class PositionsMLP(nn.Module):
     def __init__(self, hidden_dim, eps=1e-5):
         super().__init__()
         self.eps = eps
+        print(f'Using MLP with hidden dimension {hidden_dim} for position normalization.')
         self.mlp = nn.Sequential(nn.Linear(1, hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, 1))
 
     def forward(self, pos, node_mask):
+        print(pos.shape)
         norm = torch.norm(pos, dim=-1, keepdim=True)           # bs, n, 1
         new_norm = self.mlp(norm)                              # bs, n, 1
         new_pos = pos * new_norm / (norm + self.eps)
         new_pos = new_pos * node_mask.unsqueeze(-1)
         new_pos = new_pos - torch.mean(new_pos, dim=1, keepdim=True)
+        print(new_pos.shape)
         return new_pos
 
 # SE(3)-equivariant normalization layer

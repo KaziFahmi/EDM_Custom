@@ -390,9 +390,9 @@ class GraphTransformer(nn.Module):
         X = self.mlp_out_X(features.X)
         E = self.mlp_out_E(features.E)
         # y = self.mlp_out_y(features.y)
-        print(features.pos.shape)
+        # print(features.pos.shape)
         pos = self.mlp_out_pos(features.pos, node_mask)
-        print(pos.shape)
+        # print(pos.shape)
         # Residual connection to retain information from MLP layers
         X = (X + X_to_out) 
         E = (E + E_to_out) * diag_mask
