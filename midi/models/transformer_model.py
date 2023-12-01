@@ -347,6 +347,7 @@ class GraphTransformer(nn.Module):
                                       nn.Linear(hidden_mlp_dims['y'], hidden_dims['dy']), act_fn_in)
         # Multi-layer perceptron to process the position features
         self.mlp_in_pos = PositionsMLP(hidden_mlp_dims['pos'])
+        print(hidden_mlp_dims['pos'])
         # Transformer layers
         self.tf_layers = nn.ModuleList([XEyTransformerLayer(dx=hidden_dims['dx'],
                                                             de=hidden_dims['de'],
