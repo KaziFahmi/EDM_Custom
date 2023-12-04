@@ -363,8 +363,8 @@ class GraphTransformer(nn.Module):
                                        nn.Linear(hidden_mlp_dims['X'], output_dims.X + output_dims.charges))
         self.mlp_out_E = nn.Sequential(nn.Linear(hidden_dims['de'], hidden_mlp_dims['E']), act_fn_out,
                                        nn.Linear(hidden_mlp_dims['E'], output_dims.E))
-        # self.mlp_out_y = nn.Sequential(nn.Linear(hidden_dims['dy'], hidden_mlp_dims['y']), act_fn_out,
-        #                                nn.Linear(hidden_mlp_dims['y'], output_dims.y))
+        self.mlp_out_y = nn.Sequential(nn.Linear(hidden_dims['dy'], hidden_mlp_dims['y']), act_fn_out,
+                                       nn.Linear(hidden_mlp_dims['y'], output_dims.y))
         self.mlp_out_pos = PositionsMLP(hidden_mlp_dims['pos'])
 
     def forward(self, data: utils.PlaceHolder):
@@ -389,14 +389,14 @@ class GraphTransformer(nn.Module):
 
         X = self.mlp_out_X(features.X)
         E = self.mlp_out_E(features.E)
-        # y = self.mlp_out_y(features.y)
+        y = self.mlp_out_y(features.y)
         # print(features.pos.shape)
         pos = self.mlp_out_pos(features.pos, node_mask)
         # print(pos.shape)
         # Residual connection to retain information from MLP layers
         X = (X + X_to_out) 
         E = (E + E_to_out) * diag_mask
-        # y = y + y_to_out
+        y = y + y_to_out
         y = y_to_out
 
         E = 1/2 * (E + torch.transpose(E, 1, 2))
